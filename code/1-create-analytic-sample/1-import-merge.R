@@ -37,6 +37,11 @@ bd_uv <- bd %>%
 
 # export ------------------------------------------------------------------
 
+# creates subfolder "derived" in data folder, if it doesn't already exist
+if(!dir.exists(here("data", "derived"))) {
+  dir.create(here("data", "derived"))
+}
+
 saveRDS(bd_uv, here("data", "derived", "bd_uv.rds"))
 saveRDS(nedghie_data, here("data", "existing", "nedghie_data.rds"))
 saveRDS(nedghie_data_clean, here("data", "existing", "nedghie_data_clean.rds"))

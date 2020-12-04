@@ -9,3 +9,5 @@ questions-for-nedghie
 
 # Mac OS
 *.DS_Store
+.Rproj.user
+.Rproj.user/
