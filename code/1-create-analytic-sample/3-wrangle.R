@@ -40,15 +40,17 @@ bd_uv_clean <-
                         C_agecat %in% c(7,8,9) ~ "40+ years old",
                         C_agecat %in% c(888, 999) ~ NA_character_
     ),
-    cat_race = case_when(C_mrace == 11 ~ "White",
-                         C_mrace == 12 ~ "Black",
+    cat_race = case_when(C_mrace == 11 ~ "Non-Hispanic White",
+                         C_mrace == 12 ~ "Non-Hispanic Black",
                          C_mrace == 13 ~ "Hispanic",
                          C_mrace %in% c(14, 15, 16) ~ "Other",
                          C_mrace == 999 ~ NA_character_
     ),
     cat_edu = case_when(c_meduc == 999 | is.na(c_meduc) ~ NA_real_,
                         TRUE ~ c_meduc2),
-    cat_parity = case_when(NUMPG == 0 ~ "First birth",
+    cat_edu = case_when(cat_edu == 1 ~ "0-12 years",
+                        cat_edu == 2 ~ "Greater than 12 years"),
+    cat_parity = case_when(NUMPG == 0 ~ "1 birth",
                            NUMPG %in% (1:15) ~ "2+ births"
                            # else NA
     ),
@@ -64,9 +66,11 @@ bd_uv_clean <-
     # Nutrition
     log_vd = log(VITD),
     log_kcal = log(ENERC_KCAL),
-    newbmi = case_when(C_BMINIH %in% c(1,2,3,4) ~ C_BMINIH,
-                       C_BMINIH %in% c(888,999) ~ NA_real_),
-
+    newbmi = case_when(C_BMINIH == 1 ~ "Underweight",
+                       C_BMINIH == 2 ~ "Normal weight",
+                       C_BMINIH == 3 ~ "Overweight",
+                       C_BMINIH == 4 ~ "Obese",
+                       C_BMINIH %in% c(888,999) ~ NA_character_),
     # Case/control
     case = case_when(C_CC == 9 ~ NA_real_,
                      TRUE ~ C_CC),

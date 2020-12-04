@@ -4,7 +4,9 @@
 Adrien et al. (2020) Ultraviolet light, dietary vitamin D, and risk of
 select birth defects in the National Birth Defects Prevention Study.
 
-<br> <br> <br>
+<br>
+
+-----
 
 ## Instructions
 
@@ -40,26 +42,22 @@ For example, within the `1-create-analytic-sample` folder, you would run
 
 ### Appendix: NCCBDRP/CDC Replication Requirements
 
-<br>
-
-#### Create primary analytic sample
+#### 1\. Create primary analytic sample
 
 The replicator must begin with a clean NBDPS dataset and apply
 analyst-designated filters to arrive at the final analytic dataset used
 by the analyst.
 
-<br>
+#### 2\. Replicate primary analyses
 
-#### Replicate primary analyses
+**a. Confirmation of case and control counts for analyses**
 
-**1. Confirmation of case and control counts for analyses**
-
-**2. Confirmation of all main exposure and covariate distributions by
+**b. Confirmation of all main exposure and covariate distributions by
 case-control status**
 
 In this case, covariates that are included in Table 1.
 
-**3. Confirm main effect analyses intended to be reported in the
+**c. Confirm main effect analyses intended to be reported in the
 published paper**
 
 If both crude and adjusted estimates are to be included in the main
