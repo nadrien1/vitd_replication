@@ -1,0 +1,42 @@
+
+# Author: Will Simmons
+# Replication of main study results from Adrien et al. (2020)
+# Script: Import data and merge
+# Date: 2020-10-06
+#
+# packages ----------------------------------------------------------------
+
+library(tidyverse)
+library(here)
+
+# data import -------------------------------------------------------------
+
+# BD data
+bd <- read_csv(here("data", "BD9302_Analytic_VITD.csv")) %>%
+  as_tibble()
+
+# UV data
+# uv <- read_csv(here("data", "uv.csv")) %>%
+#   as_tibble()
+
+# derived UV variable - need ID and UV?
+nedghie_data <- read_csv(here("data", "UVMERGEDFILE.csv")) %>%
+  as_tibble()
+
+nedghie_data_clean <- nedghie_data %>%
+  select(Id, UV, nedghie_vitd = VITD, nedghie_missingkcal = missingkcal,
+         nedghie_kcal_ex = kcal_ex,
+         nedghie_case = case, nedghie_ENERC_KCAL = ENERC_KCAL,
+         nedghie_missmorethan1 = missmorethan1)
+
+# join --------------------------------------------------------------------
+
+# adding derived UV variable to BD data
+bd_uv <- bd %>%
+  left_join(nedghie_data_clean, by = c("id" = "Id"))
+
+# export ------------------------------------------------------------------
+
+saveRDS(bd_uv, here("data", "derived", "bd_uv.rds"))
+saveRDS(nedghie_data, here("data", "existing", "nedghie_data.rds"))
+saveRDS(nedghie_data_clean, here("data", "existing", "nedghie_data_clean.rds"))

@@ -1,0 +1,7 @@
+---
+title: 'Replication: Adrien et al Vitamin D study'
+author: "Will Simmons"
+output: html_document
+---
+
+

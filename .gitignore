@@ -1,0 +1,11 @@
+# folders
+[Dd]ata/
+resources/
+scratch/
+
+# files
+questions-for-nedghie
+.Rhistory
+
+# Mac OS
+*.DS_Store

@@ -1,0 +1,20 @@
+NCCBDRP/CDC Replication Requirements
+
+# Creating primary sample
+
+  * Begin with a clean NBDPS dataset
+  * Apply sample restrictions
+
+# Replicating primary analyses
+
+##  1. Confirmation of case and control counts for analyses
+
+##  2. Confirmation of all main exposure and covariate distributions by case-control status
+
+In this case, covariates that are included in Table 1.
+
+##  3. Confirmation of main effect analyses intended to be reported in the published paper
+
+If both crude and adjusted estimates are to be included in the main paper, both should be replicated.
+
+Estimates presented as supplementary material may be replicated but are not required to be replicated. If the presence of interactions are to be reported, confirmation of interaction effects must be performed.

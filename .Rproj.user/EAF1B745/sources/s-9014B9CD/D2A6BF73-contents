@@ -1,0 +1,864 @@
+LIBNAME nbdps 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\datasets';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats.sas';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats_newCATIdata.sas';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats_v10_NewCATI_FlatFile.sas';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats_2016Jan11.sas';
+run;
+
+
+
+********************************************************************************
+work file for calculated variables (includes: study center and conception info)
+*******************************************************************************;
+
+
+Data work.cati_merge;
+infile  "X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\excel files\Calculated_Variables.csv" dlm="," dsd missover lrecl=32000 firstobs=2;
+informat  C_bdate_std mmddyy10.;
+informat  C_dueday_std mmddyy10.;
+informat  C_concep_std mmddyy10.;
+input 
+      Id
+      refOutcome
+      c_brthyr
+      c_bdate
+      C_cc
+      C_EDDYR
+      c_dueday
+      LocID
+      C_lang
+      MBorn
+      C_mrace
+      C_frace
+      C_mage_e
+      C_mage_c
+      C_mage_d
+      C_agecat
+      C_mht_cm
+      C_mwt_kg
+      C_bmi
+      C_bminih
+      C_bmiiom
+      MEduc
+      c_meduc
+      c_meduc2
+      C_gest
+      C_gstcat
+      C_concep
+      C_bwtgm
+      C_bwtcat
+      C_smoke
+      c_gender
+      c_alcohol
+      c_drkdur
+      c_binge5
+      c_binge4
+      c_newcati
+      c_bdate_std
+      c_dueday_std
+      C_concep_std
+;
+Format  refOutcome OutCome.;
+Format  C_cc cc.;
+Format  LocID SiteInfo.;
+Format  C_lang langcalc.;
+Format  MBorn YesNo.;
+Format  C_mrace racecat.;
+Format  C_frace racecat.;
+Format  C_agecat agecat.;
+Format  C_bminih bminih.;
+Format  C_bmiiom bmiiom.;
+Format  MEduc Educatn.;
+Format  c_meduc educcat.;
+Format  c_meduc2 educcatA.;
+Format  C_gstcat gstcat.;
+Format  C_bwtcat bwtcat.;
+Format  C_smoke smoke.;
+Format  c_gender gender.;
+Format  c_alcohol alccat.;
+Format  c_drkdur drkcat.;
+Format  c_binge5 bn5cat.;
+Format  c_binge4 bn4cat.;
+Format  c_newcati newcati.;
+Format  C_bdate_std mmddyy10.;
+Format  C_dueday_std mmddyy10.;
+Format  C_concep_std mmddyy10.;
+Label  refOutcome="Outcome";
+Label  c_brthyr="Birth Year";
+Label  c_bdate="BirthDate";
+Label  C_cc="Case Control";
+Label  C_EDDYR="Year of due date";
+Label  c_dueday="Calculated due date";
+Label  LocID="Site Id";
+Label  C_lang="Language of interview";
+Label  MBorn="MotherBirthInUSA";
+Label  C_mrace="Maternal race/ethnicity";
+Label  C_mage_e="Maternal age at EDD";
+Label  C_mage_c="Maternal age at conception";
+Label  C_mage_d="Maternal age at delivery";
+Label  C_agecat="Categorized maternal age at delivery";
+Label  C_mht_cm="Maternal height cm";
+Label  C_mwt_kg="Maternal weight kg";
+Label  C_bmi="Maternal BMI";
+Label  C_bminih="Maternal BMI NIH";
+Label  C_bmiiom="Maternal BMI IOM";
+Label  MEduc="MotherHighestGradeEducation";
+Label  c_meduc="Maternal Education Level-5";
+Label  c_meduc2="Maternal Education Level-2";
+Label  C_gest="Gestational age at Delivery";
+Label  C_gstcat="Categorized gestational age";
+Label  C_concep="Date of Conception";
+Label  C_bwtgm="Birthweight in grams";
+Label  C_bwtcat="Categorized birthweight";
+Label  C_smoke="Maternal smoking";
+Label  c_gender="Gender of Infant";
+Label  c_alcohol="Calculated Yes/NoDrink Alcohol B1-M3";
+Label  c_drkdur="Calculated Drinking Duration B1-M3";
+Label  c_binge5="Calculated Binge Drinking (>=5 Drinks B1-M3)";
+Label  c_binge4="Calculated Binge Drinking (>=4 Drinks B1-M3)";
+Label  c_newcati="Cati software version for interview";
+Label  c_bdate_std="Calculated birth date - (Date Format)";
+Label  c_dueday_std="Calculated due date - (Date Format)";
+Label  C_concep_std="Calculated date of conception - (Date Format)";
+RUN;
+
+
+********************************************************************************
+work file for mv and prenatal vitamins
+*******************************************************************************;
+
+
+proc format;
+	value yesnox 	0="no"
+					1="yes"; 
+	run;
+data vit_merge;
+	set nbdps.vitamins_cdc_v10
+	(keep=id gmvpd1 gmvpd2 gmvpd3 gppd1 gppd2 gppd3);
+	run;
+
+
+
+********************************************************************************
+work file for ffq vitamins
+*******************************************************************************;
+
+Data work.ffq_merge;
+infile  "X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\excel files\Sect_D_Nutrients_USDA_New.csv" dlm="," dsd missover lrecl=32000 firstobs=2;
+;
+input 
+      Id
+      Missing
+      Refused
+      Unknown
+      ALA_G
+      ALC
+      ARG_G
+      ASH
+      ASP_G
+      BETN
+      CA
+      CAFFN
+      CAMD5
+      CARTA
+      CARTB
+      CHOCAL
+      CHOCDF
+      CHOLE
+      CHOLN
+      CHOLNFR
+      CHOLNGPC
+      CHOLNPC
+      CHOLNPTC
+      CHOLNSM
+      CRYPX
+      CU
+      CYS_G
+      ENERC_KCAL
+      ENERC_KJ
+      ERGCAL
+      F10D0
+      F12D0
+      F13D0
+      F14D0
+      F14D1
+      F15D0
+      F15D1
+      F16D0
+      F16D1
+      F16D1C
+      F16D1T
+      F17D0
+      F17D1
+      F18D0
+      F18D1
+      F18D1C
+      F18D1T
+      F18D2
+      F18D2CLA
+      F18D2CN6
+      F18D3
+      F18D3CN3
+      F18D3CN6
+      F18D4
+      F20D0
+      F20D1
+      F20D2CN6
+      F20D3
+      F20D4
+      F20D5
+      F22D0
+      F22D1
+      F22D1C
+      F22D1T
+      F22D4
+      F22D5
+      F22D6
+      F24D0
+      F24D1C
+      F4D0
+      F6D0
+      F8D0
+      FAMS
+      FAPU
+      FASAT
+      FAT
+      FATRN
+      FATRNM
+      FATRNP
+      FE
+      FIBTG
+      FOL
+      FOLAC
+      FOLDFE
+      FOLFD
+      FRUS
+      GALS
+      GLU_G
+      GLUS
+      GLY_G
+      HISTN_G
+      HYP
+      ILE_G
+      K
+      LACS
+      LEU_G
+      LUT_ZEA
+      LYCPN
+      LYS_G
+      MALS
+      MET_G
+      MG
+      MN
+      NA
+      NIA
+      P
+      PANTAC
+      PHE_G
+      PHYSTR
+      PRO_G
+      PROCNT
+      RETOL
+      RIBF
+      SE
+      SER_G
+      SITSTR
+      STARCH
+      STID7
+      SUCS
+      SUGAR
+      THEBRN
+      THIA
+      THR_G
+      TOCPHA
+      TOCPHB
+      TOCPHD
+      TOCPHG
+      TOCTRA
+      TOCTRB
+      TOCTRD
+      TOCTRG
+      TRP_G
+      TYR_G
+      VAL_G
+      VITA_IU
+      VITA_RAE
+      VITB12
+      VITB6A
+      VITC
+      VITD
+      VITK1
+      VITK1D
+      WATER
+      ZN
+      Daidzein
+      Genistein
+      Glycetin
+      Formonoetin
+      Biochanin_A
+      Coumestrol
+      Secoisolariciresinol
+      Matairesinol
+      Total_Iso
+      Total_Ligs
+      Total_PE
+      GI
+      GL
+;
+Label  Missing="Nutrient Questions Missing";
+Label  Refused="Nutrient Questions Refused";
+Label  Unknown="Nutrient Questions Unknown";
+Label  ALA_G="Alanine";
+Label  ALC="Alcohol, ethyl";
+Label  ARG_G="Arginine";
+Label  ASH="Ash";
+Label  ASP_G="Aspartic acid";
+Label  BETN="Betaine";
+Label  CA="Calcium, Ca";
+Label  CAFFN="Caffeine";
+Label  CAMD5="Campesterol";
+Label  CARTA="Carotene, alpha";
+Label  CARTB="Carotene, beta";
+Label  CHOCAL="Vitamin D3 (cholecalciferol) (mcg)";
+Label  CHOCDF="Carbohydrate, by difference";
+Label  CHOLE="Cholesterol";
+Label  CHOLN="Total Choline";
+Label  CHOLNFR="Free Choline";
+Label  CHOLNGPC="Choline from glycerophoshocholine";
+Label  CHOLNPC="Choline from phosphocholine";
+Label  CHOLNPTC="Choline from phosphatidylcholine";
+Label  CHOLNSM="Choline from sphingomyelin";
+Label  CRYPX="Cryptoxanthin, beta";
+Label  CU="Copper, Cu";
+Label  CYS_G="Cystine";
+Label  ENERC_KCAL="Energy (kcal)";
+Label  ENERC_KJ="Energy (kj)";
+Label  ERGCAL="Vitamin D2 (ergocalciferol) (mcg)";
+Label  F10D0="10:0";
+Label  F12D0="12:0";
+Label  F13D0="13:0";
+Label  F14D0="14:0";
+Label  F14D1="14:1";
+Label  F15D0="15:0";
+Label  F15D1="15:1";
+Label  F16D0="16:0";
+Label  F16D1="16:1 undifferentiated";
+Label  F16D1C="16:1 c";
+Label  F16D1T="16:1 t";
+Label  F17D0="17:0";
+Label  F17D1="17:1";
+Label  F18D0="18:0";
+Label  F18D1="18:1 undifferentiated";
+Label  F18D1C="18:1 c";
+Label  F18D1T="18:1 t";
+Label  F18D2="18:2 undifferentiated";
+Label  F18D2CLA="18:2 CLAs";
+Label  F18D2CN6="18:2 n-6 c,c";
+Label  F18D3="18:3 undifferentiated";
+Label  F18D3CN3="18:3 n-3 c,c,c";
+Label  F18D3CN6="18:3 n-6 c,c,c";
+Label  F18D4="18:4";
+Label  F20D0="20:0";
+Label  F20D1="20:1";
+Label  F20D2CN6="20:2 n-6 c,c";
+Label  F20D3="20:3 undifferentiated";
+Label  F20D4="20:4 undifferentiated";
+Label  F20D5="20:5 n-3";
+Label  F22D0="22:0";
+Label  F22D1="22:1 undifferentiated";
+Label  F22D1C="22:1 c";
+Label  F22D1T="22:1 t";
+Label  F22D4="22:4";
+Label  F22D5="22:5 n-3";
+Label  F22D6="22:6 n-3";
+Label  F24D0="24:0";
+Label  F24D1C="24:1 c";
+Label  F4D0="4:0";
+Label  F6D0="6:0";
+Label  F8D0="8:0";
+Label  FAMS="Fatty acids, total monounsaturated";
+Label  FAPU="Fatty acids, total polyunsaturated";
+Label  FASAT="Fatty acids, total saturated";
+Label  FAT="Total lipid (fat)";
+Label  FATRN="Fatty acids, total trans";
+Label  FATRNM="Fatty acids, total trans-monoenoic";
+Label  FATRNP="Fatty acids, total trans-polyenoic";
+Label  FE="Iron, Fe";
+Label  FIBTG="Fiber, total dietary";
+Label  FOL="Folate, total";
+Label  FOLAC="Folic acid";
+Label  FOLDFE="Folate, DFE";
+Label  FOLFD="Folate, food";
+Label  FRUS="Fructose";
+Label  GALS="Galactose";
+Label  GLU_G="Glutamic acid";
+Label  GLUS="Glucose (dextrose)";
+Label  GLY_G="Glycine";
+Label  HISTN_G="Histidine";
+Label  HYP="Hydroxyproline";
+Label  ILE_G="Isoleucine";
+Label  K="Potassium, K";
+Label  LACS="Lactose";
+Label  LEU_G="Leucine";
+Label  LUT_ZEA="Lutein and zeaxanthin";
+Label  LYCPN="Lycopene";
+Label  LYS_G="Lysine";
+Label  MALS="Maltose";
+Label  MET_G="Methionine";
+Label  MG="Magnesium, Mg";
+Label  MN="Manganese, Mn";
+Label  NA="Sodium, Na";
+Label  NIA="Niacin";
+Label  P="Phosphorus, P";
+Label  PANTAC="Pantothenic acid";
+Label  PHE_G="Phenylalanine";
+Label  PHYSTR="Phytosterols";
+Label  PRO_G="Proline";
+Label  PROCNT="Protein";
+Label  RETOL="Retinol";
+Label  RIBF="Riboflavin";
+Label  SE="Selenium, Se";
+Label  SER_G="Serine";
+Label  SITSTR="Beta-sitosterol";
+Label  STARCH="Starch";
+Label  STID7="Stigmasterol";
+Label  SUCS="Sucrose";
+Label  SUGAR="Sugars, total";
+Label  THEBRN="Theobromine";
+Label  THIA="Thiamin";
+Label  THR_G="Threonine";
+Label  TOCPHA="Vitamin E (alpha-tocopherol)";
+Label  TOCPHB="Tocopherol, beta";
+Label  TOCPHD="Tocopherol, delta";
+Label  TOCPHG="Tocopherol, gamma";
+Label  TOCTRA="Tocotrienol, alpha";
+Label  TOCTRB="Tocotrienol, beta";
+Label  TOCTRD="Tocotrienol, delta";
+Label  TOCTRG="Tocotrienol, gamma";
+Label  TRP_G="Tryptophan";
+Label  TYR_G="Tyrosine";
+Label  VAL_G="Valine";
+Label  VITA_IU="Vitamin A, IU";
+Label  VITA_RAE="Vitamin A, RAE";
+Label  VITB12="Vitamin B-12";
+Label  VITB6A="Vitamin B-6";
+Label  VITC="Vitamin C, total ascorbic acid";
+Label  VITD="Vitamin D";
+Label  VITK1="Vitamin K (phylloquinone)";
+Label  VITK1D="Dihydrophylloquinone";
+Label  WATER="Water";
+Label  ZN="Zinc, Zn";
+Label  Daidzein="Daidzein";
+Label  Genistein="Genistein";
+Label  Glycetin="Glycetin";
+Label  Formonoetin="Formonoetin";
+Label  Biochanin_A="Biochanin_A";
+Label  Coumestrol="Coumestrol";
+Label  Secoisolariciresinol="Secoisolariciresinol";
+Label  Matairesinol="Matairesinol";
+Label  Total_Iso="Total Isoflavones";
+Label  Total_Ligs="Total Lignans";
+Label  Total_PE="Total Phytoestrogens";
+Label  GI="Glycemic Index";
+Label  GL="Glycemic Load";
+RUN;
+
+data work.ffq_merge;
+	set work.ffq_merge 
+		(keep=id ca chocal ergcal vitd Missing Refused Unknown ENERC_KCAL);
+	run;
+
+
+proc print data=ffq_merge (obs=10);
+	var chocal ergcal vitd;
+	run;
+proc univariate data=ffq_merge plot;
+	var chocal ergcal vitd;
+	run;
+
+
+
+
+
+********************************************************************************
+work file for outcomes
+*******************************************************************************;
+
+*outcomes data;
+
+LIBNAME outcomes 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\datasets\outcomes\'; 
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\NBDPS V10 Outcome Formats';
+run;
+proc format;
+	value caco		
+					1='case'
+					0='control';
+
+	value summary 	
+					-2='NA'
+					0='No summary'
+					1='Isolated'
+					2='Multiple'
+					3='Syndrome'
+					4='Complex';
+
+	value Hcomp
+					0='Unclassified'
+					1='Simple'
+					2='Association'
+					3='Complex pattern'
+					4='Other'
+					5='Unclear, Possible Errors'
+					6='Cannot Classify';
+
+	value grouping 	
+					1='IJM'
+					2='Duodenal'
+					3='Colonic';
+	
+	value abgrouping	1='Limb anomalies'
+						2='Craniofacial disruptions +/- limb anomalies'
+						3='BWC +/- limb anomalies and +/- craniofacial disruptions';
+	value leveltwo
+					999= 	'noncontributory'
+					100=	'Heterotaxia'
+					110=	'Truncus'
+					111=	'IAA, type B'
+					112=	'IAA, NOS'
+					113=	'dTGA'
+					114=	'Fallot'
+					115=	'DORV-other'
+					116=	'DORV-TGA'
+					120=	'AVSD'
+					130=	'TAPVR'
+					131=	'PAPVR'
+					140=	'HLHS'
+					141=	'IAA, type A'
+					142=	'Coarctation ao'
+					143=	'Ao stenosis'
+					150=	'Pulm Atresia'
+					151=	'Tri atresia'
+					152=	'Ebstein'
+					153=	'Pulm V sten'
+					160=	'VSD pm'
+					161=	'VSD musc'
+					162=	'VSD, os/nos'
+					163=	'VSD conov'
+					170=	'ASD2'
+					171=	'ASD, os/nos'
+					180=	'SV or other complex'
+					181=	'LTGA';
+run;
+
+data out_merge;
+	set outcomes.Outcomes_20150911;
+	format  aagroupingcomplex aagroupinghigh;
+	run;
+
+
+
+*******************************************************************************
+	work file for single vitamins
+*****************************************************************************;
+
+*Please see single vitamin d sas file for derivations;
+
+libname singlevd 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\datasets';
+	run;
+
+data singlevdfin_merge;
+	set singlevd.singlevdfin;
+	run;
+
+
+
+*******************************************************************************
+	work file for pregnancy histories
+*****************************************************************************;
+
+
+Data work.history;
+      infile  'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\excel files\Section_C_Pregnancy_History.csv' dlm="," dsd missover lrecl=32000 firstobs=2;
+;
+input 
+      Id
+      NumPg
+      LiveBirths
+      StillBirths
+      Abortion
+      Miscarriage
+      Tubal
+      Molar
+      PgBMM
+      PgBDD
+      PgBYY
+      Wgt
+      WgtU
+      HgtFt
+      HgtIn
+      WgtPg
+      WgtPgU
+      GainLose
+      WgtChg
+      WgtChgU
+      WhenWks
+      WhenMos
+      AnyBC
+      AnyOC
+      OtherBC
+      PGHow
+      PGWantTo
+      FertProc
+      FertGate
+      FMed
+      FProc
+      MSurgProc
+      MMed
+      MProc
+      Nausea
+      NausM1
+      NausM2
+      NausM3
+      NausT2
+      NausT3
+      NausFrM1
+      NausFrM2
+      NausFrM3
+      NausFrT2
+      NausFrT3
+      VomFrM1
+      VomFrM2
+      VomFrM3
+      VomFrT2
+      VomFrT3
+      Treat
+      LoseWgt
+      MSWgt
+      MSWgtU
+      MSWgtDk
+      PC
+      PCV1MM
+      PCV1DD
+      PCV1YY
+      PCV1Wks
+      USBd
+      Blood
+      Amnio
+      AmnioDye
+      CVS
+      Needle
+      OthTest
+      OthProc
+      AnyCompl
+;
+Format  NumPg PregCnt.;
+Format  PgBMM DateMM.;
+Format  PgBDD DateDD.;
+Format  PgBYY DateYY.;
+Format  WgtU WghtUnit.;
+Format  HgtFt Feet.;
+Format  HgtIn Inches.;
+Format  WgtPgU WghtUnit.;
+Format  GainLose WghtGain.;
+Format  WgtChgU WghtUnit.;
+Format  WhenWks WeekOfPG.;
+Format  WhenMos MonOfPg.;
+Format  AnyBC YesNoDK.;
+Format  AnyOC YesNoDK.;
+Format  OtherBC YesNoDK.;
+Format  PGHow PregHow.;
+Format  PGWantTo PregWant.;
+Format  FertProc YesNo.;
+Format  FertGate YesNoDK.;
+Format  FMed YesNoDK.;
+Format  FProc YesNoDK.;
+Format  MSurgProc YesNoDK.;
+Format  MMed YesNoDK.;
+Format  MProc YesNoDK.;
+Format  Nausea YesNoDK.;
+Format  NausM1 YesNoDK.;
+Format  NausM2 YesNoDK.;
+Format  NausM3 YesNoDK.;
+Format  NausT2 YesNoDK.;
+Format  NausT3 YesNoDK.;
+Format  NausFrM1 FreqMon.;
+Format  NausFrM2 FreqMon.;
+Format  NausFrM3 FreqMon.;
+Format  NausFrT2 FreqMon.;
+Format  NausFrT3 FreqMon.;
+Format  VomFrM1 FreqMon.;
+Format  VomFrM2 FreqMon.;
+Format  VomFrM3 FreqMon.;
+Format  VomFrT2 FreqMon.;
+Format  VomFrT3 FreqMon.;
+Format  Treat YesNoDK.;
+Format  LoseWgt YesNoDK.;
+Format  PC YesNoDK.;
+Format  PCV1MM DatMMEst.;
+Format  PCV1DD DatDDEst.;
+Format  PCV1YY DateYY.;
+Format  PCV1Wks WeekOfPG.;
+Format  USBd YesNoDK.;
+Format  Blood YesNoDK.;
+Format  Amnio YesNoDK.;
+Format  AmnioDye YesNoDK.;
+Format  CVS YesNoDK.;
+Format  Needle CVSNeedl.;
+Format  OthTest YesNoDK.;
+Format  OthProc YesNoDK.;
+Format  AnyCompl YesNoDK.;
+Label  NumPg="NumTimesPregnantBefore";
+Label  PgBMM="DOB of Last Baby before Index Date";
+Label  PgBDD="DOB of Last Baby before Index Date";
+Label  PgBYY="DOB of Last Baby before Index Date";
+Label  Wgt="MotherWgtBeforePregNum";
+Label  WgtU="MotherWgtBeforePregUnit";
+Label  HgtFt="MotherHeightFeet";
+Label  HgtIn="MotherHeightInches";
+Label  WgtPg="Dropped";
+Label  WgtPgU="Dropped";
+Label  GainLose="MotherWgtGainLoseDuringPreg";
+Label  WgtChg="MotherWgtChangeDuringPregNum";
+Label  WgtChgU="MotherWgtChangeDuringPregUnit";
+Label  WhenWks="WhenFoundOutPregWeeks";
+Label  WhenMos="WhenFoundOutPregMonths";
+Label  AnyBC="Yes/No_Contraception-3toDOIB";
+Label  AnyOC="Yes/No_UsedBirthControlPills-3toDOIB";
+Label  OtherBC="Yes/No_UsedOtherContraception-3toDOIB";
+Label  PGHow="HowPregnantWithContraception";
+Label  PGWantTo="DidWantPregnancy";
+Label  FertProc="Dropped";
+Label  FertGate="Yes/No_UsedFertilityMedsProcedures";
+Label  FMed="Yes/No_UsedFatherFertilityMeds";
+Label  FProc="Yes/No_FatherFertilityProcedures";
+Label  MSurgProc="Yes/No_MotherFertilityProcedures";
+Label  MMed="Yes/No_UseFertilityMeds";
+Label  MProc="Yes/No_UsedMotherFertilityProcedure";
+Label  Nausea="Yes/No_HavePregnancyNausea";
+Label  NausM1="Yes/No_NauseaMonth1OfPreg";
+Label  NausM2="Yes/No_NauseaMonth2OfPreg";
+Label  NausM3="Yes/No_NauseaMonth3OfPreg";
+Label  NausT2="Yes/No_Nausea2ndTrimesterOfPreg";
+Label  NausT3="Yes/No_Nausea3rdTrimesterOfPreg";
+Label  NausFrM1="FreqNauseaMonth1OfPreg";
+Label  NausFrM2="FreqNauseaMonth2OfPreg";
+Label  NausFrM3="FreqNauseaMonth3OfPreg";
+Label  NausFrT2="FreqgNausea2ndTrimesterOfPreg";
+Label  NausFrT3="FreqNausea3rdTrimesterOfPregnancy";
+Label  VomFrM1="FreqVomitMonth1OfPregnancy";
+Label  VomFrM2="FreqVomitMonth2OfPregnancy";
+Label  VomFrM3="FreqVomitMonth3OfPregnancy";
+Label  VomFrT2="FreqVomit2ndTrimesterOfPregnancy";
+Label  VomFrT3="FreqVomit3rdTrimesterOfPregnancy";
+Label  Treat="Yes/No_HavePregnancyNauseaMeds";
+Label  LoseWgt="Yes/No_PregNauseaWeightLoss";
+Label  PC="Yes/No_HavePregPrenatalCare";
+Label  PCV1MM="PregPrenatalCare1stVisitMM";
+Label  PCV1DD="PregPrenatalCare1stVisitDD";
+Label  PCV1YY="PregPrenatalCare1stVisitYY";
+Label  PCV1Wks="PregPrenatalCare1stVisitWksPreg";
+Label  USBd="Yes/No_haveAbnormalUltrasound";
+Label  Blood="Yes/No_HavePregBloodTest";
+Label  Amnio="Yes/No_PregAmnioTest";
+Label  AmnioDye="Yes/No_HavePregAmnioTestDye";
+Label  CVS="Yes/No_HavePregCVS";
+Label  Needle="CVSNeedleInVaginaOrAbdomen";
+Label  OthTest="Yes/No_HaveOtherPrenatalTest";
+Label  OthProc="Yes/No_HaveOtherPrenatalProcedures";
+Label  AnyCompl="Yes/No_OtherPrenatalProcedureComplication";
+RUN;
+
+
+data work.history_merge;
+	set work.history (keep=id numpg);
+	run;
+
+
+*****************************************************************
+sort and merge 6 files
+****************************************************************;
+
+%macro sort (dataset);
+	proc sort data=&dataset; by id; run;
+%mend sort;
+
+%sort (cati_merge);
+%sort (vit_merge);
+%sort (ffq_merge);
+%sort (out_merge);
+%sort (singlevdfin_merge);
+%sort (history_merge);
+
+
+data mergedfile;
+	merge
+		work.cati_merge
+		work.vit_merge
+		work.ffq_merge
+		work.out_merge	
+		work.singlevdfin_merge
+		work.history_merge;
+	by id;
+	run;
+
+
+*adding uv dataset from the week of 11/15/17 (noticed 14 from 2002 NJ were missing);
+
+proc import datafile="X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\excel files\uvformerge_newnj.xlsx"
+            out=nbdps.uv
+            dbms=xlsx
+            replace;
+            getnames=yes;
+run;
+
+
+*make basefile and uv temps for merge;
+data base;
+	set mergedfile;
+
+	cmonthb=month(C_concep_std);
+
+	cyearb=year(C_concep_std);
+		*to account for the ONE missing woman with an estimated conception date of 2/2000; 
+
+	cmonth=.;
+		if cmonthb>. then cmonth=cmonthb;
+		if cmonthb=. then cmonth=2;
+
+	cyear=.;
+		if cyearb>. then cyear=cyearb;
+		if cyearb=. then cyear=2000;
+
+	run;
+data uv;
+	set nbdps.uv;
+	run;
+
+
+*sort all;
+proc sort data=base; by locid cyear cmonth; run;
+proc sort data=uv; by locid cyear cmonth; run;
+
+
+*one to many merge with UV by cyear, cmonth, locid dataset;
+data uvmergedfile;
+	merge uv base;
+		by locid cyear cmonth;
+	run; 
+
+
+*save as a permanent dataset;
+data nbdps.uvmergedfile;
+	set uvmergedfile;
+	if id>.;
+	run;
+
+/*
+proc univariate data=nbdps.uvmergedfile;
+	var ca;
+	histogram;
+	run;
+	*706.015 median, skewed;
+*/
+
+	

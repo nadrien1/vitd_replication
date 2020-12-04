@@ -1,0 +1,343 @@
+*******************************
+Programmer: Olivia R. Orta
+Date: April 18 2018
+Objective: (Step 2) Add new variables to merged dataset for uv, vitamin D birth defects study
+********************************;
+
+*******************************************************
+MAKING NEW VARIABLES in merged file
+****************************************************************;
+
+*run libname, %includes, and run all together;
+LIBNAME nbdps 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\datasets';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats.sas';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats_newCATIdata.sas';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats_v10_NewCATI_FlatFile.sas';
+%include 'X:\Bureau of Family & Community Health\Center for Birth Defects Research and Prevention\DATA\PROJECTS\NBDPS Latitude and Birth Defects\sas\formats\Formats_2016Jan11.sas';
+run;
+
+
+data nbdps.newvars; *making a new permanent dataset called new vars in folder nbdps;
+	set nbdps.uvmergedfile; *using previously merged (and permanent) file from step 1;
+
+	***********************************************
+	Vitamin d from sunlight (UV)
+	***********************************************;
+
+	/*
+	*used continuous UV from the conception month to determine EPA cutpoints;
+	proc univariate data=uvmergedfile; *noprint;
+   		var uv;
+   		*output out=percentiles1 pctlpts=33.3 66.7 pctlpre=P;
+		run;
+		proc print data=percentiles1;
+		run;
+	*range of uv= 1.0-12.5
+	*tertile cutpoints were: 4 and 8;
+	*quartile cutpoints were: 3, 6, and 9;
+	*/
+
+
+	epauvindexcats=.; *near conception;
+		if 0.5 <= uv < 2.5 then epauvindexcats=0;
+		if 2.5 <= uv < 5.5 then epauvindexcats=1;
+		if 5.5 <= uv < 7.5 then epauvindexcats=2;
+		if uv >= 7.5 then epauvindexcats=3;	
+
+
+	***********************************************
+	Vitamin d from pre-pregnancy diet
+	***********************************************;
+
+	logvd=log(vitd);
+	logkcal=log(enerc_kcal);
+
+	/*
+	*new 12-8-17 among controls!: for vd tertiles;
+	proc univariate data=temp noprint;
+   		var vitd;
+		where case=0;
+   		output out=percentiles1 pctlpts=33.3 66.7 pctlpre=P;
+		run;
+		proc print data=percentiles1;
+		run;
+	*tertile cutpoints were: 65.2120 and 107.554;
+	*/
+
+	vdtert=.; *on original scale;
+		if 0 <= vitd < 65.2120 then vdtert=0;
+		if 65.2120 <= vitd < 107.554 then vdtert=1;
+		if vitd >= 107.554 then vdtert=2;
+		if vitd=. then vdtert=.;
+
+	highvd=.; *on original scale;
+		if vdtert=2 then highvd=1;
+		if vdtert=1 then highvd=0;
+		if vdtert=0 then highvd=0;
+		if vdtert=. then highvd=.;
+
+
+	***********************************************
+	Vitamin d from supplementation (b3-p2): prenatal, multivitamin and singlevd <-- very few
+	***********************************************;
+
+	anypvb3p2=.;
+		if gppd1=1 or gppd2=1 or gppd3=1 then anypvb3p2=1;
+		if gppd1=0 and gppd2=0 and gppd3=0 then anypvb3p2=0;
+
+	anymvb3p2=.;
+		if gmvpd1=1 or gmvpd2=1 or gmvpd3=1 then anymvb3p2=1;
+		if gmvpd1=0 and gmvpd2=0 and gmvpd3=0 then anymvb3p2=0;
+
+	anypmv=.;
+		if anypvb3p2=0 and anymvb3p2=0 then anypmv=0;
+		if anypvb3p2=0 and anymvb3p2=1 then anypmv=1;
+		if anypvb3p2=0 and anymvb3p2=. then anypmv=0;
+
+		if anypvb3p2=1 and anymvb3p2=0 then anypmv=1;
+		if anypvb3p2=1 and anymvb3p2=1 then anypmv=1;
+		if anypvb3p2=1 and anymvb3p2=. then anypmv=1;
+
+		if anypvb3p2=. and anymvb3p2=0 then anypmv=0;
+		if anypvb3p2=. and anymvb3p2=1 then anypmv=1;
+		if anypvb3p2=. and anymvb3p2=. then anypmv=.;
+
+	singlevd=.;
+		if vd_ExpB3P2=1 then singlevd=1;
+		if vd_ExpB3P2=2 then singlevd=0;
+		if vd_ExpB3P2=8 then singlevd=.;
+		if vd_ExpB3P2=0 then singlevd=.;
+
+	*now includes any mv, prental, or single vitamin d from b3-p2; 
+	anysupp=.;
+		if anypmv=0 and singlevd=0 then anysupp=0;
+		if anypmv=0 and singlevd=1 then anysupp=1;
+		if anypmv=0 and singlevd=. then anysupp=0;
+
+		if anypmv=1 and singlevd=0 then anysupp=1;
+		if anypmv=1 and singlevd=1 then anysupp=1;
+		if anypmv=1 and singlevd=. then anysupp=1;
+
+		if anypmv=. and singlevd=0 then anysupp=0;
+		if anypmv=. and singlevd=1 then anysupp=1;
+		if anypmv=. and singlevd=. then anysupp=.;
+
+	vdsuppnum=.;
+		if anypmv=0 and singlevd=0 then vdsuppnum=0;
+		if anypmv=1 and singlevd=0 then vdsuppnum=1;
+		if anypmv=0 and singlevd=1 then vdsuppnum=1;
+		if anypmv=1 and singlevd=1 then vdsuppnum=2;
+
+	vdsuppnum2=.;
+		if anypmv=0 and singlevd=0 then vdsuppnum2=0;
+		if anypmv=1 and singlevd=0 then vdsuppnum2=1;
+		if anypmv=0 and singlevd=1 then vdsuppnum2=2;
+		if anypmv=1 and singlevd=1 then vdsuppnum2=2;
+
+
+	***********************************************
+	Vitamin d from diet and supp
+	***********************************************;
+
+	highvd_supp=.;
+		if highvd=0 and anysupp=0 then highvd_supp=0;
+		if highvd=1 and anysupp=0 then highvd_supp=1;
+		if highvd=0 and anysupp=1 then highvd_supp=2;
+		if highvd=1 and anysupp=1 then highvd_supp=3;
+
+
+	***********************************************
+	Other vars
+	***********************************************;
+
+	case=.;
+		if c_cc=1 then case=1;
+		if c_cc=2 then case=0;
+
+	*indicator vars for study center;
+	ark=.; if locid=10 then ark=1; else ark=0;
+	cal=.; if locid=11 then cal=1; else cal=0;
+	iowa=.; if locid=12 then iowa=1; else iowa=0;
+	mass=.; if locid=13 then mass=1; else mass=0;
+	nj=.; if locid=14 then nj=1; else nj=0;
+	ny=.; if locid=15 then ny=1; else ny=0;
+	tex=.; if locid=16 then tex=1; else tex=0;
+	cdc=.; if locid=17 then cdc=1; else cdc=0;
+	nc=.; if locid=18 then nc=1; else nc=0;
+	ut=.; if locid=19 then ut=1; else ut=0;
+
+	agecat4=.;
+		if C_agecat=1 or C_agecat=2 or C_agecat=3 then agecat4=0;
+		if C_agecat=4 then agecat4=1;
+		if C_agecat=5 then agecat4=2;
+		if C_agecat=6 or C_agecat=7 or C_agecat=8 or C_agecat=9 then agecat4=3;
+		if C_agecat=888 then agecat4=888;
+		if C_agecat=999 then agecat4=999;
+
+	cdate=catx ('/',put(month(C_concep_std),z2.),put(day(C_concep_std),z2.));
+		***for the one missing women with a calc bday of 11/21/2000
+			using wheel estimated date of conception is either february 28 or march 1
+			using online calculator date of conception is february 29
+			either way that is a winter conception date so will code as such;
+			*for uv need to assign a month, since more evidence of feb dates than march, assigning feb 2000;
+
+	*exclusion criteria
+		-missing more than 1 ffq
+		-kcal less than 500
+		-kcal greater than 5000;
+
+	missmorethan1=.;
+		if missing=0 or missing=1 then missmorethan1=0;
+		else missmorethan1=1;
+
+	kcal_ls500=.;
+		if ENERC_KCAL < 500 and ENERC_KCAL ne . then kcal_ls500=1; 
+		if ENERC_KCAL >= 500 and ENERC_KCAL ne . then kcal_ls500=0; 
+
+	kcal_gr5000=.;
+		if ENERC_KCAL > 5000 and ENERC_KCAL ne . then kcal_gr5000=1; 
+		if ENERC_KCAL <= 5000 and ENERC_KCAL ne . then kcal_gr5000=0; 
+
+	missingkcal=.;
+		if ENERC_KCAL=. then missingkcal=1; else missingkcal=0;
+		
+	kcal_ex=.;
+		if kcal_ls500=1 or  kcal_gr5000=1 then kcal_ex=1; 
+			else kcal_ex=0;
+	north=.;
+		if locid= 10 then north=0;
+		if locid= 11 then north=0;
+		if locid= 12 then north=1;
+		if locid= 13 then north=1;
+		if locid= 14 then north=1;
+		if locid= 15 then north=1;
+		if locid= 16 then north=0;
+		if locid= 17 then north=0;
+		if locid= 18 then north=0;
+		if locid= 19 then north=0;
+
+	newage=.;
+		if C_agecat in (1,2) then newage=1;
+		if C_agecat=3 then newage=2;
+		if C_agecat=4 then newage=3;
+		if C_agecat=5 then newage=4;
+		if C_agecat=6 then newage=5;
+		if C_agecat in (7,8,9) then newage=6;
+
+	newrace=.;
+		if C_mrace=11 then newrace=1;
+		if C_mrace=12 then newrace=2;
+		if C_mrace=13 then newrace=3;
+		if C_mrace in (14,15,16) then newrace=4;
+		if C_mrace=999 then newrace=5;
+
+	newbmi=.;
+		if C_bminih=1 then newbmi=1;
+		if C_bminih=2 then newbmi=2;
+		if C_bminih=3 then newbmi=3;
+		if C_bminih=4 then newbmi=4;
+		if C_bminih in (999,888) then newbmi=5;
+
+	newparity=.;
+		if numpg=0 then newparity=0;
+		if numpg in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15) 
+			then newparity=1;
+
+	recvd=.;
+		if vitd >= 600 then recvd=1;
+		if vitd <600 then recvd=0;
+
+	lowuv=.;
+		if epauvindexcats=0 then lowuv=1;
+		else lowuv=0;
+
+	lowdiet=.;
+		if vdtert=0 then lowdiet=1;
+		if vdtert=1 then lowdiet=0;
+		if vdtert=2 then lowdiet=0;
+		if vdtert=. then lowdiet=.;
+
+	sconcep=.;
+		*summer;
+		if "20Jun1997"d <= C_concep_std <= "21Sep1997"d then sconcep=0;
+		if "20Jun1998"d <= C_concep_std <= "21Sep1998"d then sconcep=0;
+		if "20Jun1999"d <= C_concep_std <= "21Sep1999"d then sconcep=0;
+		if "20Jun2000"d <= C_concep_std <= "21Sep2000"d then sconcep=0;
+		if "20Jun2001"d <= C_concep_std <= "21Sep2001"d then sconcep=0;
+		if "20Jun2002"d <= C_concep_std <= "21Sep2002"d then sconcep=0;
+		if "20Jun2003"d <= C_concep_std <= "21Sep2003"d then sconcep=0;
+		if "20Jun2004"d <= C_concep_std <= "21Sep2004"d then sconcep=0;
+		if "20Jun2005"d <= C_concep_std <= "21Sep2005"d then sconcep=0;
+		if "20Jun2006"d <= C_concep_std <= "21Sep2006"d then sconcep=0;
+		if "20Jun2007"d <= C_concep_std <= "21Sep2007"d then sconcep=0;
+		if "20Jun2008"d <= C_concep_std <= "21Sep2008"d then sconcep=0;
+		if "20Jun2009"d <= C_concep_std <= "21Sep2009"d then sconcep=0;
+		if "20Jun2010"d <= C_concep_std <= "21Sep2010"d then sconcep=0;
+		
+		*spring;
+		if "20Mar1997"d <= C_concep_std <= "19Jun1997"d then sconcep=1;
+		if "20Mar1998"d <= C_concep_std <= "19Jun1998"d then sconcep=1;
+		if "20Mar1999"d <= C_concep_std <= "19Jun1999"d then sconcep=1;
+		if "20Mar2000"d <= C_concep_std <= "19Jun2000"d then sconcep=1;
+		if "20Mar2001"d <= C_concep_std <= "19Jun2001"d then sconcep=1;
+		if "20Mar2002"d <= C_concep_std <= "19Jun2002"d then sconcep=1;
+		if "20Mar2003"d <= C_concep_std <= "19Jun2003"d then sconcep=1;
+		if "20Mar2004"d <= C_concep_std <= "19Jun2004"d then sconcep=1;
+		if "20Mar2005"d <= C_concep_std <= "19Jun2005"d then sconcep=1;
+		if "20Mar2006"d <= C_concep_std <= "19Jun2006"d then sconcep=1;
+		if "20Mar2007"d <= C_concep_std <= "19Jun2007"d then sconcep=1;
+		if "20Mar2008"d <= C_concep_std <= "19Jun2008"d then sconcep=1;
+		if "20Mar2009"d <= C_concep_std <= "19Jun2009"d then sconcep=1;
+		if "20Mar2010"d <= C_concep_std <= "19Jun2010"d then sconcep=1;
+		if "20Mar2011"d <= C_concep_std <= "19Jun2011"d then sconcep=1;
+
+		*fall;
+		if "22Sep1997"d <= C_concep_std <= "20Dec1997"d then sconcep=2;
+		if "22Sep1998"d <= C_concep_std <= "20Dec1998"d then sconcep=2;
+		if "22Sep1999"d <= C_concep_std <= "20Dec1999"d then sconcep=2;
+		if "22Sep2000"d <= C_concep_std <= "20Dec2000"d then sconcep=2;
+		if "22Sep2001"d <= C_concep_std <= "20Dec2001"d then sconcep=2;
+		if "22Sep2002"d <= C_concep_std <= "20Dec2002"d then sconcep=2;
+		if "22Sep2003"d <= C_concep_std <= "20Dec2003"d then sconcep=2;
+		if "22Sep2004"d <= C_concep_std <= "20Dec2004"d then sconcep=2;
+		if "22Sep2005"d <= C_concep_std <= "20Dec2005"d then sconcep=2;
+		if "22Sep2006"d <= C_concep_std <= "20Dec2006"d then sconcep=2;
+		if "22Sep2007"d <= C_concep_std <= "20Dec2007"d then sconcep=2;
+		if "22Sep2008"d <= C_concep_std <= "20Dec2008"d then sconcep=2;
+		if "22Sep2009"d <= C_concep_std <= "20Dec2009"d then sconcep=2;
+		if "22Sep2010"d <= C_concep_std <= "20Dec2010"d then sconcep=2;
+
+		*winter;
+		if "21Dec1996"d <= C_concep_std <= "19Mar1997"d then sconcep=3;
+		if "21Dec1997"d <= C_concep_std <= "19Mar1998"d then sconcep=3;
+		if "21Dec1998"d <= C_concep_std <= "19Mar1999"d then sconcep=3;
+		if "21Dec1999"d <= C_concep_std <= "19Mar2000"d then sconcep=3;
+		if "21Dec2000"d <= C_concep_std <= "19Mar2001"d then sconcep=3;
+		if "21Dec2001"d <= C_concep_std <= "19Mar2002"d then sconcep=3;
+		if "21Dec2002"d <= C_concep_std <= "19Mar2003"d then sconcep=3;
+		if "21Dec2003"d <= C_concep_std <= "19Mar2004"d then sconcep=3;
+		if "21Dec2004"d <= C_concep_std <= "19Mar2005"d then sconcep=3;
+		if "21Dec2005"d <= C_concep_std <= "19Mar2006"d then sconcep=3;
+		if "21Dec2006"d <= C_concep_std <= "19Mar2007"d then sconcep=3;
+		if "21Dec2007"d <= C_concep_std <= "19Mar2008"d then sconcep=3;
+		if "21Dec2008"d <= C_concep_std <= "19Mar2009"d then sconcep=3;
+		if "21Dec2009"d <= C_concep_std <= "19Mar2010"d then sconcep=3;
+		if "21Dec2010"d <= C_concep_std <= "19Mar2011"d then sconcep=3;
+		if C_concep_std=. then sconcep=3; *missing women;
+
+	fwconcep=.;
+		if sconcep=0 or sconcep=1 then fwconcep=0;
+		if sconcep=2 or sconcep=3 then fwconcep=1;
+
+	run;
+
+
+***************************************************************
+working dataset minus exclusions, step 3 will add new variables
+***************************************************************;
+
+
+data nbdps.newvarsandex;
+		set nbdps.uvmergedfile;
+		where missmorethan1=0 and missingkcal=0 and kcal_ex=0;
+	run;
