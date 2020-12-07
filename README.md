@@ -11,21 +11,25 @@ select birth defects in the National Birth Defects Prevention Study.
 ## Instructions
 
 This quick README will guide you through how to use this repository
-alongside code sent by Kathy at the NBDPS center (hopefully, a dataset
+alongside data sent by Kathy at the NBDPS center (hopefully, a dataset
 called `BD3902_Analytic_VITD.csv`). You may not be running the code
 contained in this repository, but I wanted to set this up in case you
 needed to.
 
-### Downloading this code
+### Downloading the code from this GitHub repository
 
 1.  Use the green Code button above; click “Download ZIP.” Save the
-    folder somewhere on your computer you can easily access it.
+    folder somewhere on your computer you’d want to keep these files.
 2.  Unzip the folder. It should result in a folder called
     `vitd_replication-main` or similar.
-3.  IMPORTANT: Add a folder called `data` to the unzipped folder. **Copy
-    the `BD3902_Analytic_VITD.csv` file into it.** (If you do not name
-    the folder `data` - all lowercase\! - or don’t put it in the main
-    folder, this code will not work.)
+3.  IMPORTANT: Add a folder called `data` to the unzipped folder
+    (`vitd_replication-main`). **Copy the `BD3902_Analytic_VITD.csv`
+    file into it.** If you do not name the folder `data` - all
+    lowercase\! - or don’t put it in the main folder, this code will not
+    work.
+4.  For now, you’ll also need to **copy your derived datafile you sent
+    me via SAMS into the `data` folder** you created in the previous
+    step (`UVMERGEDFILE.csv`).
 
 ### A note on this repository’s file structure
 
@@ -35,6 +39,8 @@ the case, run codefiles in order of their prefix.
 
 For example, within the `1-create-analytic-sample` folder, you would run
 `1-import-merge.R` before `2-vitd-tertiles.R`, and so on.
+
+Files/folders with the same prefix can be run in any order.
 
 <br>
 
