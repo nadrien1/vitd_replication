@@ -1,12 +1,12 @@
 {
     "dialog-state": {
-        "query": "bd <-",
+        "query": "black",
         "path": "~/Documents/NBDPS/nedghie_replication",
         "regex": false,
         "caseSensitive": false,
         "filePatterns": [],
         "excludeFilePatterns": [],
-        "resultsCount": 1,
+        "resultsCount": 0,
         "errorCount": 0,
         "replaceErrors": ""
     }

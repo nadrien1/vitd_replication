@@ -20,7 +20,7 @@ vitd_tertiles <- bd_uv %>%
          nedghie_missmorethan1 == 0 &
          nedghie_ENERC_KCAL > 500 &
          nedghie_ENERC_KCAL < 5000 &
-         !is.na(nedghie_ENERC_KCAL)           # ┌	values used in Nedghie's code
+         !is.na(nedghie_ENERC_KCAL)           # ┌	tertile values used in Nedghie's code
   ) %>%                                       # |
   summarize(tertiles = quantile(nedghie_vitd, probs = c(0.333, 0.667), na.rm = T, type = 2))
                                 # |

@@ -15,6 +15,8 @@ library(here)
 bd <- read_csv(here("data", "BD9302_Analytic_VITD.csv")) %>%
   as_tibble()
 
+# Nedghie's derived data - using her derived UV variable, and using to test discrepancies w/ NBDPS data
+
 # UV data
 # uv <- read_csv(here("data", "uv.csv")) %>%
 #   as_tibble()
