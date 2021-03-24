@@ -22,7 +22,7 @@ bd_uv_clean <- readRDS(here("data", "derived", "bd_uv_clean.rds"))
 
 # creating table ----------------------------------------------------------
 
-table1 <-
+tbl1_dat <-
   bd_uv_clean_filtered %>%
   # fixing labels, etc.
   filter(C_CC %in% c(0, 1)) %>%  # excluding case/control == NA, 3, 9, etc.
@@ -74,8 +74,10 @@ table1 <-
     lowuv = "Low UV conception month",
     fwconcep = "Fall/winter conception",
     low_vitd = "Low dietary Vitamin D"
-  ) %>%
-  # table
+  )
+
+table1 <-
+  tbl1_dat %>%
   tbl_summary(by = "C_CC_char",
               type = list(everything() ~ "categorical")) %>%
   as_gt() %>%
@@ -85,4 +87,5 @@ table1 <-
 # export ------------------------------------------------------------------
 
 saveRDS(table1, here("output", "table1.rds"))
+saveRDS(tbl1_dat, here("data/derived/tbl1_dat.rds"))
 gtsave(table1, "table1.pdf", here("output"))
