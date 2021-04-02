@@ -24,8 +24,8 @@ bd_uv_clean_filtered %>% count(case)
 # with Nedghie's variables
 bd_uv_clean %>%
   filter(
-    nedghie_missmorethan1 == 0 &
-    nedghie_missingkcal == 0 &
+    nedghie_missmorethan1 == 0 &  # differing MISSING counts
+    nedghie_missingkcal == 0 &  # differing kcal distributions
     nedghie_kcal_ex == 0
   ) %>% count(nedghie_case)  # same as nedghie_data
 
@@ -37,7 +37,8 @@ bd_uv_clean %>%
     nedghie_kcal_ex != kcal_ex |
     case != nedghie_case
   ) %>%
-  select(ends_with("than1"), ends_with("missingkcal"), ends_with("_ex"), matches("case"))
+  select(id, ends_with("than1"), ends_with("missingkcal"), ends_with("_ex"), matches("case")) %>%
+  view
   # 167 unequal rows between my and Nedghie's calculated variables
     # troubleshoot my code
     # see how much is due to differences in ENERC_KCAL, VITD, case
