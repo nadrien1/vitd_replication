@@ -24,7 +24,7 @@ bd_uv_clean_filtered %>% count(case)
 # with Nedghie's variables
 bd_uv_clean %>%
   filter(
-    nedghie_missmorethan1 == 0 &  # differing MISSING counts
+    nedghie_missmorethan1 == 0 &  # differing MISSING counts #how many MISSING counts?
     nedghie_missingkcal == 0 &  # differing kcal distributions
     nedghie_kcal_ex == 0
   ) %>% count(nedghie_case)  # same as nedghie_data
@@ -86,3 +86,7 @@ colSums(mock_nedghie_data, na.rm = T)
 # to make my dataset into Nedghie's (in terms of cases/controls):
   # 1. remove 6 controls, to match our controls at 11,168
   # 2. remove 1 of my NAs and add remaining 172 NAs to cases, to match our cases at 30,349
+
+#difference of 7 but with your total (41351) and mine (41344). 
+# cases (30,176) to your (30,177)
+# controls (11,168) to your (11,174)
